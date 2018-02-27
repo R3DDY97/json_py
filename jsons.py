@@ -15,11 +15,13 @@ def bool_parser(json_str):
         return (True, json_str[4:])
     elif json_str[:5] == 'false':
         return (False, json_str[5:])
+    return None
 
 
 def null_parser(json_str):
     if json_str[:4] == 'null':
         return (None, json_str[4:])
+    return None
 
 
 def space_parser(json_str) :
@@ -142,6 +144,10 @@ def num_parser(json_str):
 
 
 def array_parser(json_str):
+
+    if whitespace_parser(json_str):
+        _, json_str = whitespace_parser(json_str)
+
     if json_str[0] == "[":
         array_asList = []
         json_str = json_str[1:]
@@ -163,7 +169,8 @@ def array_parser(json_str):
             _, json_str = whitespace_parser(json_str)
 
         if json_str[0] == "]":
-            continue
+            json_str = json_str[1:]
+            break
         elif json_str[0] == ",":
             _, json_str = comma_parser(json_str)
         else:
@@ -172,6 +179,10 @@ def array_parser(json_str):
     return (array_asList, json_str)
 
 def object_parser(json_str):
+
+    if whitespace_parser(json_str):
+        _, json_str = whitespace_parser(json_str)
+
     if json_str[0] == "{":
         object_as_dict = {}
         json_str = json_str[1:]
@@ -204,7 +215,7 @@ def object_parser(json_str):
             _, json_str = comma_parser(json_str)
         else:
             return None
-    return (object_as_dict, json_str)
+    return (object_as_dict, json_str[1:])
 
 
 def whitespace_parser(json_str):
