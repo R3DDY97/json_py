@@ -28,3 +28,9 @@
  **returns the parsed json as python data structures which can be furthur  processed using python methods, functions.....**
 
  ![screenshot from 2018-02-28 16-01-36](https://user-images.githubusercontent.com/13858661/36782999-bfbb9b74-1ca0-11e8-9e1e-19beb0c40c2d.png)
+
+
+To do:
+
+* optimize and clean different sub parsers
+* add dump functionality
