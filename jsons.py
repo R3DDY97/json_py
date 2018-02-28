@@ -136,13 +136,20 @@ def num_parser(json_str):
 
     number = json_str[:index]
     try:
-
         if isinstance(int(number), int):
             return (int(number), json_str[index:])
-        elif isinstance(float(number), float):
-            return (float(number), json_str[index:])
     except ValueError:
-        return (json_str[:index], json_str[index:])
+        return (float(number), json_str[index:])
+
+
+    # try:
+    #
+    #     if isinstance(int(number), int):
+    #         return (int(number), json_str[index:])
+    #     elif isinstance(float(number), float):
+    #         return (float(number), json_str[index:])
+    # except ValueError:
+    #     return (json_str[:index], json_str[index:])
 
 
 def array_parser(json_str):
