@@ -2,13 +2,12 @@
 '''converts JSON into python objects'''
 
 import string
-from pprint import pprint
 
 DIGITS = set(string.digits)
 DIGITS_ = set(string.digits).union({"-"})
 FULL_DIGITS = set(string.digits).union({"-", "+", ".", "E", "e"})
-PRINTABLES = set(string.printable).difference({"\\", '"'})
 WHITESPACES = set(string.whitespace)
+# PRINTABLES = set(string.printable).difference({"\\", '"'})
 
 
 def bool_parser(json_str):
@@ -34,21 +33,6 @@ def whitespace_parser(json_str):
         index += 1
     return (total_consumed, json_str[index:])
 
-    # index = 0
-    # if json_str[index] in WHITESPACES:
-    #     while json_str[index] in WHITESPACES:
-    #         index += 1
-    #     return (json_str[:index], json_str[index:])
-    # return "", json_str
-
-# def space_parser(json_str) :
-#     index = 0
-#     if json_str[0] != " ":
-#         return None
-#     while json_str[index] == " ":
-#         index += 1
-#     return (" "*index, json_str[index:])
-#
 def comma_parser(json_str):
     if json_str[0] == ",":
         return (json_str[0], json_str[1:])
@@ -66,8 +50,6 @@ def space_comma_parser(json_str):
     if json_str[index] == ',':
         total_consumed += ","
         index += 1
-    # else:
-    #     return None
 
     while json_str[index] in WHITESPACES:
         total_consumed += json_str[index]
@@ -86,8 +68,6 @@ def space_colon_parser(json_str):
     if json_str[index] == ':':
         total_consumed += ":"
         index += 1
-    # else:
-    #     return None
 
     while json_str[index] in WHITESPACES:
         total_consumed += json_str[index]
@@ -103,7 +83,6 @@ def string_parser(json_str):
         if json_str[index] == '"' and json_str[index-1]+json_str[index] != '\\"':
             break
         index += 1
-    # index += 1
     return (json_str[1:index], json_str[index+1:])
 
 def num_parser(json_str):
@@ -128,8 +107,6 @@ def num_parser(json_str):
         index += 2
         has_dot = True
 
-
-    # while index < len(json_str) and json_str[index] in FULL_DIGITS:
     while json_str[index] in FULL_DIGITS:
         if json_str[index] in DIGITS:
             index += 1
@@ -170,13 +147,10 @@ def num_parser(json_str):
 
 def array_parser(json_str):
 
-    # if whitespace_parser(json_str):
-    #     _, json_str = whitespace_parser(json_str)
-
-    array_asList = []
+    array_list = []
 
     if json_str[0] == "[" and json_str[1] == "]":
-        return (array_asList, json_str[2:])
+        return (array_list, json_str[2:])
     if json_str[0] == "[":
         json_str = json_str[1:]
     else:
@@ -190,9 +164,8 @@ def array_parser(json_str):
         parser_output = value_parser(json_str)
         if parser_output:
             value, json_str = parser_output
-            array_asList.append(value)
+            array_list.append(value)
         else:
-            # return (array_asList, json_str[1:])
             break
 
         if whitespace_parser(json_str):
@@ -200,20 +173,11 @@ def array_parser(json_str):
 
         if json_str[0] == "]":
             break
-            # json_str = json_str[1:]
-        # elif whitespace_parser(json_str):
-        #     _, json_str = whitespace_parser(json_str)
-            # return (array_asList, json_str)
         elif space_comma_parser(json_str):
             _, json_str = space_comma_parser(json_str)
-        # else:
-        #     break
-    return (array_asList, json_str[1:])
+    return (array_list, json_str[1:])
 
 def object_parser(json_str):
-
-    # if whitespace_parser(json_str):
-    #     _, json_str = whitespace_parser(json_str)
 
     object_as_dict = {}
 
@@ -231,7 +195,7 @@ def object_parser(json_str):
         if string_parser(json_str):
             key, json_str = string_parser(json_str)
         else:
-            break # ? or return None
+            break
 
         if space_colon_parser(json_str):
             _, json_str = space_colon_parser(json_str)
@@ -252,8 +216,7 @@ def object_parser(json_str):
 
         elif space_comma_parser(json_str):
             _, json_str = space_comma_parser(json_str)
-        # else:
-        #     break
+
     return (object_as_dict, json_str[1:])
 
 
@@ -269,4 +232,3 @@ def value_parser(json_str):
         result = parser(json_str)
         if result:
             return result
-    return json_str
