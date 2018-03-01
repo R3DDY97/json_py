@@ -15,9 +15,16 @@ def load():
         with open(jsfile, "r") as json_content:
             for line in json_content:
                 json_str += line
-    parser_ouput = jsons.value_parser(json_str)
-    pprint(parser_ouput[0])
-    return jsons.value_parser(json_str)
+    parser_ouput = jsons.value_parser(json_str)[0]
+    pprint(parser_ouput)
+    return parser_ouput
+
+
+def loads(json_str):
+    '''directly parses JSON input string'''
+    parser_ouput = jsons.value_parser(json_str)[0]
+    pprint(parser_ouput)
+    return parser_ouput
 
 
 if __name__ == '__main__':
