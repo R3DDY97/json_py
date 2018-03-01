@@ -9,7 +9,6 @@ DIGITS = set(string.digits)
 DIGITS_ = set(string.digits).union({"-"})
 FULL_DIGITS = set(string.digits).union({"-", "+", ".", "E", "e"})
 WHITESPACES = set(string.whitespace)
-# PRINTABLES = set(string.printable).difference({"\\", '"'})
 
 
 def bool_parser(json_str):
@@ -24,7 +23,6 @@ def null_parser(json_str):
     if json_str[:4] == 'null':
         return (None, json_str[4:])
     return None
-
 
 def whitespace_parser(json_str):
     index = 0
@@ -58,9 +56,7 @@ def string_parser(json_str):
     if json_str[0] != '"':
         return None
     index += 1
-    while True:
-        if json_str[index] == '"' and json_str[index-1]+json_str[index] != '\\"':
-            break
+    while json_str[index] != '"' or json_str[index-1]+json_str[index] == '\\"':
         index += 1
     return (json_str[1:index], json_str[index+1:])
 
@@ -86,7 +82,7 @@ def num_parser(json_str):
         index += 2
         has_dot = True
 
-    while json_str[index] in FULL_DIGITS:
+    while json_str[index] in FULL_DIGITS and not has_e:
         if json_str[index] in DIGITS:
             index += 1
         elif json_str[index] == "-":
@@ -97,14 +93,10 @@ def num_parser(json_str):
                 index += 1
 
         elif json_str[index].lower() == "e":
-            if has_e:
-                return None
+            if json_str[index+1] in "+-":
+                index += 2
             else:
-                has_e = True
-                if json_str[index+1] in "+-":
-                    index += 2
-                else:
-                    index += 1
+                index += 1
 
         elif json_str[index] == ".":
             if has_dot:
@@ -121,9 +113,7 @@ def num_parser(json_str):
         return (float(number), json_str[index:])
 
 def array_parser(json_str):
-
     array_list = []
-
     if json_str[0] == "[" and json_str[1] == "]":
         return (array_list, json_str[2:])
     elif json_str[0] == "[":
@@ -132,27 +122,14 @@ def array_parser(json_str):
         return None
 
     json_str = whitespace_parser(json_str)
-
     while json_str[0] != "]":
-        parser_output = value_parser(json_str)
-        if parser_output:
-            value, json_str = parser_output
-            array_list.append(value)
-        else:
-            break
-
-        json_str = whitespace_parser(json_str)
-
-        if json_str[0] == "]":
-            break
-        elif space_comma_parser(json_str):
-            json_str = space_comma_parser(json_str)
+        value, json_str = value_parser(json_str)
+        array_list.append(value)
+        json_str = space_comma_parser(json_str)
     return (array_list, json_str[1:])
 
 def object_parser(json_str):
-
     object_as_dict = {}
-
     if json_str[0] == "{" and json_str[1] == "}":
         return (object_as_dict, json_str[2:])
     if json_str[0] == "{":
@@ -160,45 +137,21 @@ def object_parser(json_str):
     else:
         return None
 
+    json_str = whitespace_parser(json_str)
     while json_str[0] != "}":
-        json_str = whitespace_parser(json_str)
-
-        if string_parser(json_str):
-            key, json_str = string_parser(json_str)
-        else:
-            break
-
-        if space_colon_parser(json_str):
-            json_str = space_colon_parser(json_str)
-        else:
-            return None
-
-        if value_parser(json_str):
-            value, json_str = value_parser(json_str)
-            object_as_dict[key] = value
-        else:
-            return None
-
-        json_str = whitespace_parser(json_str)
-
-        if json_str[0] == "}":
-            break
-
-        elif space_comma_parser(json_str):
-            json_str = space_comma_parser(json_str)
-
+        key, json_str = string_parser(json_str)
+        json_str = space_colon_parser(json_str)
+        object_as_dict[key], json_str = value_parser(json_str)
+        json_str = space_comma_parser(json_str)
     return (object_as_dict, json_str[1:])
-
 
 
 def value_parser(json_str):
     ''' main function which calls the other subparser functions taking input JSON string'''
 
     json_str = whitespace_parser(json_str)
-
     parsers = [bool_parser, null_parser, num_parser,
                string_parser, array_parser, object_parser]
-
     for parser in parsers:
         result = parser(json_str)
         if result:
