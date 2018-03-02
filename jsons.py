@@ -29,7 +29,7 @@ def whitespace_parser(json_str):
     index = 0
     while json_str[index] in WHITESPACES:
         index += 1
-    return json_str[index:]
+    return json_str[:index], json_str[index:]
 
 def space_comma_parser(json_str):
     index = 0
@@ -39,7 +39,7 @@ def space_comma_parser(json_str):
         index += 1
     while json_str[index] in WHITESPACES:
         index += 1
-    return json_str[index:]
+    return json_str[:index], json_str[index:]
 
 
 def space_colon_parser(json_str):
@@ -50,7 +50,7 @@ def space_colon_parser(json_str):
         index += 1
     while json_str[index] in WHITESPACES:
         index += 1
-    return json_str[index:]
+    return json_str[:index], json_str[index:]
 
 def string_parser(json_str):
     index = 0
@@ -58,6 +58,8 @@ def string_parser(json_str):
         return None
     index += 1
     while json_str[index] != '"' or json_str[index-1]+json_str[index] == '\\"':
+        if ord(json_str[index]) not in range(65536):
+            return None
         index += 1
     return (json_str[1:index], json_str[index+1:])
 
@@ -111,11 +113,11 @@ def array_parser(json_str):
     else:
         return None
 
-    json_str = whitespace_parser(json_str)
+    _, json_str = whitespace_parser(json_str)
     while json_str[0] != "]":
         value, json_str = value_parser(json_str)
         array_list.append(value)
-        json_str = space_comma_parser(json_str)
+        _, json_str = space_comma_parser(json_str)
     return (array_list, json_str[1:])
 
 def object_parser(json_str):
@@ -127,19 +129,19 @@ def object_parser(json_str):
     else:
         return None
 
-    json_str = whitespace_parser(json_str)
+    _, json_str = whitespace_parser(json_str)
     while json_str[0] != "}":
         key, json_str = string_parser(json_str)
-        json_str = space_colon_parser(json_str)
+        _, json_str = space_colon_parser(json_str)
         object_as_dict[key], json_str = value_parser(json_str)
-        json_str = space_comma_parser(json_str)
+        _, json_str = space_comma_parser(json_str)
     return (object_as_dict, json_str[1:])
 
 
 def value_parser(json_str):
     ''' main function which calls the other subparser functions taking input JSON string'''
 
-    json_str = whitespace_parser(json_str)
+    _, json_str = whitespace_parser(json_str)
     parsers = [bool_parser, null_parser, num_parser,
                string_parser, array_parser, object_parser]
     for parser in parsers:
