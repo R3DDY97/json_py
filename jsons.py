@@ -12,6 +12,7 @@ WHITESPACES = set(string.whitespace)
 
 
 def bool_parser(json_str):
+    '''parses boolean obj in JSON'''
     if json_str[:4] == 'true':
         return (True, json_str[4:])
     elif json_str[:5] == 'false':
@@ -73,37 +74,26 @@ def num_parser(json_str):
 
     if json_str[0] == "-":
         has_minus = True
+        index += 1
         if json_str[:3] == "-0.":
-            index += 3
+            index += 2
             has_dot = True
-        else:
-            index += 1
     elif json_str[:2] == "0.":
         index += 2
         has_dot = True
 
     while json_str[index] in FULL_DIGITS and not has_e:
-        if json_str[index] in DIGITS:
-            index += 1
-        elif json_str[index] == "-":
-            if has_minus:
-                return None
-            else:
-                has_minus = True
-                index += 1
+        if json_str[index] == "-" and not has_minus:
+            has_minus = True
 
         elif json_str[index].lower() == "e":
+            has_e = True
             if json_str[index+1] in "+-":
-                index += 2
-            else:
                 index += 1
 
-        elif json_str[index] == ".":
-            if has_dot:
-                return None
-            elif not has_dot:
-                index += 1
-                has_dot = True
+        elif json_str[index] == "." and not has_dot:
+            has_dot = True
+        index += 1
 
     number = json_str[:index]
     try:
@@ -162,11 +152,13 @@ def value_parser(json_str):
 def main():
     '''runs json parser from input json file'''
     jsfile = os.path.abspath(os.sys.argv[1])
-    if os.path.isfile(os.path.abspath(jsfile)):
-        json_str = ''
-        with open(jsfile, "r") as json_content:
-            for line in json_content:
-                json_str += line
+    if not os.path.isfile(os.path.abspath(jsfile)):
+        print("\nCant find the file\n")
+        os.sys.exit(1)
+    json_str = ''
+    with open(jsfile, "r") as json_content:
+        for line in json_content:
+            json_str += line
     parser_ouput = value_parser(json_str)[0]
     pprint(parser_ouput)
     return parser_ouput
