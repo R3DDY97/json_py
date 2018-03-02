@@ -2,7 +2,7 @@
 
 ## Description and Usage
 
-**jsons.py parses and prints the any json input file on to the terminal**
+*jsons.py parses and prints the any json input file on to the terminal*
 ***
 `$ git clone https://github.com/R3DDY97/json_py`
 
@@ -17,9 +17,9 @@
 ***
 
 
-***it can also be used inside python using either JSON string or file***
+it can also be used inside python using either JSON string or file
 
-***it returns the parsed json as python data type which can be furthur  processed using corresponding python methods, functions.....***
+it returns the parsed json as python data type which can be furthur  processed using corresponding python methods, functions.....
 
 **json_py folder should be in python's path**
 
