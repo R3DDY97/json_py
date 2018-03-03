@@ -45,4 +45,5 @@ https://asciinema.org/a/ED32eWcXsUo0R11OnHyG00hbt -->
 
 
 To do:
+* Use regex for number parser
 * To add dump and dumps functionality
