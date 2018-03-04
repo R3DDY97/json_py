@@ -5,7 +5,7 @@ import string
 import os
 
 DIGITS = set(string.digits).union({"-"})
-FULL_DIGITS = set(string.digits).union({"-", "+", ".", "E", "e"})
+FULL_DIGITS = set(string.digits).union({".", "E", "e"})
 
 def bool_parser(json_str):
     '''parses boolean obj in JSON'''
@@ -126,7 +126,7 @@ def main():
             json_str += line
 
     parsed_json = value_parser(json_str)
-    if parsed_json:
+    if parsed_json and not parsed_json[1]:
         print(parsed_json[0])
         return parsed_json[0]
 
