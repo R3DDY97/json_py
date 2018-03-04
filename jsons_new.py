@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 '''converts JSON into python objects'''
 
-import string
+# import string
 import os
-
-DIGITS = set(string.digits).union({"-"})
-FULL_DIGITS = set(string.digits).union({".", "E", "e"})
+# 
+# DIGITS = set(string.digits).union({"-"})
+# FULL_DIGITS = set(string.digits).union({".", "E", "e"})
 
 def bool_parser(json_str):
     '''parses boolean obj in JSON'''
@@ -33,7 +33,7 @@ def string_parser(json_str):
 def num_parser(json_str):
     index = 0
     has_dot, has_e = False, False
-    if json_str[index] not in DIGITS:
+    if json_str[index] not in "0123456789-":
         return None
     if json_str[0] == "-":
         index += 1
@@ -41,7 +41,7 @@ def num_parser(json_str):
         index += 2
         has_dot = True
 
-    while json_str[index] in FULL_DIGITS:
+    while json_str[index] in "0123456789eE.":
         if json_str[index].lower() == "e":
             if has_e:
                 return None
