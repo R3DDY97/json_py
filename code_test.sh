@@ -3,7 +3,7 @@
 
 cd sample_json
 
-parser="$HOME/Documents/GEEK_SK00L/json_py/jsons.py"
+parser="$HOME/Documents/GEEK_SK00L/json_py/jsons_new.py"
 
 clear
 printf "\nWill be testing parser using  the below Sample JSON files .....\n\n"
@@ -17,9 +17,9 @@ do
     clear
     printf "Using $i \n"
     sleep 0.5
-    printf "\njsons.py $i\n\n"
+    printf "\njsons_new.py $i\n\n"
     sleep 1
-    python3 ../jsons.py $i
+    python3 ../jsons_new.py $i
     echo
     read -p "Press Enter key to test next sample JSON file"
 done
