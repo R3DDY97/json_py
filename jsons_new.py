@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 '''converts JSON into python objects'''
 
-# import string
 import os
-# 
-# DIGITS = set(string.digits).union({"-"})
-# FULL_DIGITS = set(string.digits).union({".", "E", "e"})
+from pprint import pprint
 
 def bool_parser(json_str):
     '''parses boolean obj in JSON'''
@@ -15,7 +12,6 @@ def bool_parser(json_str):
         return (False, json_str[5:])
     return None
 
-
 def null_parser(json_str):
     if json_str[:4] == 'null':
         return (None, json_str[4:])
@@ -23,21 +19,20 @@ def null_parser(json_str):
 
 def string_parser(json_str):
     index = 0
-    if json_str[0] != '"':
-        return None
-    index += 1
-    while json_str[index] != '"' or json_str[index-1]+json_str[index] == '\\"':
+    if json_str[0] == '"':
         index += 1
-    return (json_str[1:index], json_str[index+1:])
+        while json_str[index] != '"' or json_str[index-1]+json_str[index] == '\\"':
+            index += 1
+        return (json_str[1:index], json_str[index+1:])
+    return None
 
 def num_parser(json_str):
-    index = 0
-    has_dot, has_e = False, False
+    index, has_dot, has_e = 0, False, False
     if json_str[index] not in "0123456789-":
         return None
     if json_str[0] == "-":
         index += 1
-    if json_str[:2] == "0.":
+    if json_str[index:2] == "0.":
         index += 2
         has_dot = True
 
@@ -69,48 +64,53 @@ def array_parser(json_str):
         return None
 
     while json_str[0] != "]":
+        value_parsed = value_parser(json_str)
+        if value_parsed:
+            value, json_str = value_parsed[0], value_parsed[1].lstrip()
+            array_list.append(value)
+        else:
+            break
         if json_str[0] == ",":
+            if json_str[1:].lstrip()[0] == "]":
+                return None
             json_str = json_str[1:].lstrip()
-        value, json_str = value_parser(json_str)
-        json_str = json_str.lstrip()
-        array_list.append(value)
     return (array_list, json_str[1:])
 
 def object_parser(json_str):
-    object_as_dict = {}
     if json_str[0] == "{":
         json_str = json_str[1:].lstrip()
     else:
         return None
 
+    object_as_dict = {}
     while json_str[0] != "}":
-        if json_str[0] == ",":
-            json_str = json_str[1:].lstrip()
         string_parsed = string_parser(json_str)
         if string_parsed:
             key, json_str = string_parsed[0], string_parsed[1].lstrip()
         else:
-            return None
+            break
         if json_str[0] == ":":
             json_str = json_str[1:].lstrip()
+            value_parsed = value_parser(json_str)
+            if value_parsed:
+                object_as_dict[key], json_str = value_parsed[0], value_parsed[1].lstrip()
         else:
             return None
-        object_as_dict[key], json_str = value_parser(json_str)
-        json_str = json_str.lstrip()
+        if json_str[0] == ",":
+            if json_str[1:].lstrip()[0] == "}":
+                return None
+            json_str = json_str[1:].lstrip()
     return (object_as_dict, json_str[1:])
 
 def value_parser(json_str):
     ''' main function which calls the other subparser functions taking input JSON string'''
-
     json_str = json_str.lstrip()
     parsers = [bool_parser, null_parser, num_parser,
                string_parser, array_parser, object_parser]
     for parser in parsers:
-        result = parser(json_str)
-        if result:
-            return result
-    print("\n\tNot valid JSON\n")
-    os.sys.exit()
+        value_parsed = parser(json_str)
+        if value_parsed:
+            return value_parsed
     return None
 
 
@@ -126,10 +126,9 @@ def main():
             json_str += line
 
     parsed_json = value_parser(json_str)
-    if parsed_json and not parsed_json[1]:
-        print(parsed_json[0])
+    if parsed_json:
+        pprint(parsed_json[0])
         return parsed_json[0]
-
     print("\n\tNot a Valid JSON\n")
     return None
 
